@@ -1,6 +1,15 @@
 # axi
 
-Unofficial Python library for working with the [AxiDraw v3](http://www.axidraw.com/) pen plotter.
+Python 3 library for working with the [AxiDraw v3](http://www.axidraw.com/) pen plotter.
+
+> **Note:** This is a fork of the original [axi](https://github.com/fogleman/axi) library by [Michael Fogleman](https://github.com/fogleman). Full credit for the original design and implementation goes to him. This fork adds Python 3 support, bug fixes, and image drawing utilities.
+
+### What's New (Python 3 Fork)
+
+- **Python 3 support** — fully migrated from Python 2 (removed `__future__` imports, fixed `print`, `xrange`, `filter`/`zip`, integer division, etc.)
+- **Binary image to plotter** — read any black-on-white PNG and draw it using contour extraction (`scikit-image`)
+- **Serial stability** — retry logic and increased timeout for USB connection drops
+- **Bug fixes** — pen up/down command correction, `ZeroDivisionError` fix in progress bar for empty drawings
 
 ### Features
 
@@ -8,6 +17,7 @@ Unofficial Python library for working with the [AxiDraw v3](http://www.axidraw.c
 - convenient command-line utility
 - constant acceleration (trapezoidal velocity) motion planning
 - path drawing order optimization
+- draw from binary PNG images (contour extraction + greedy path sorting)
 - drawing transformations
   - translate, scale, rotate
   - scale and/or rotate to fit page
@@ -17,7 +27,7 @@ Unofficial Python library for working with the [AxiDraw v3](http://www.axidraw.c
 
 ### Command Line Utility
 
-Once `pip install'd`, you can run the axi command-line utility. Here are the supported commands:
+Once installed, you can run the `axi` command-line utility. Here are the supported commands:
 
 ```
 axi on         # enable the motors
@@ -38,17 +48,35 @@ axi goto X Y   # move to the (X, Y) absolute position
 
 ### Installation
 
-`axi` is not yet available on PyPI, so installation works like this:
+Requires **Python 3.7+**.
 
-    git clone https://github.com/fogleman/axi.git
-    cd axi
-    pip install -e .
+```bash
+git clone https://github.com/aiarcade/axi.git
+cd axi
+python3 -m venv venv
+source venv/bin/activate
+pip install -e .
+pip install Pillow scikit-image   # for image drawing support
+```
 
-Of course, installing in a `virtualenv` is always a good idea.
+### Drawing from a Binary Image
 
-Then you can try the examples...
+Generate a line-drawing PNG and plot it:
 
-    python examples/dragon_curve.py
+```bash
+python create_image.py    # creates face_drawing.png
+python sample_test.py     # reads the PNG and draws on the plotter
+```
+
+`sample_test.py` reads any black-on-white PNG, extracts contours using `scikit-image`, simplifies paths, and draws them on the AxiDraw using direct device calls.
+
+### Quick Test
+
+A minimal test to verify your plotter connection (draws a 1-inch square):
+
+```bash
+python simple_test.py
+```
 
 ### Example
 
@@ -71,3 +99,12 @@ def main(iteration):
 if __name__ == '__main__':
     main(12)
 ```
+
+### Credits
+
+- **Original library:** [Michael Fogleman](https://github.com/fogleman) — [fogleman/axi](https://github.com/fogleman/axi)
+- **Python 3 fork & enhancements:** [aiarcade](https://github.com/aiarcade)
+
+### License
+
+See [LICENSE.md](LICENSE.md) for details.

@@ -24,7 +24,7 @@ def fill_circle(cx, cy, cr, n):
     return result
 
 def punchcard_from_csv(csv_path):
-    with open(csv_path, 'rb') as fp:
+    with open(csv_path, 'r', newline='') as fp:
         reader = csv.reader(fp)
         csv_rows = list(reader)
     row_labels = [x[0] for x in csv_rows[1:]]
@@ -64,9 +64,9 @@ def punchcard_from_csv(csv_path):
     d = axi.Drawing(paths)
     d = d.scale_to_fit(12, 8.5)
 
-    print 'joining paths'
+    print('joining paths')
     d = d.join_paths(0.02)
-    print 'simplifying paths'
+    print('simplifying paths')
     d = d.simplify_paths(0.001)
 
     d.render().write_to_png('out.png')

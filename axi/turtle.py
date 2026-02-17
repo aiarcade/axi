@@ -100,7 +100,7 @@ class Turtle(object):
         a1 = to_degrees(math.atan2(self.y - cy, self.x - cx))
         a2 = a1 + extent if radius >= 0 else a1 - extent
         for i in range(steps):
-            p = i / float(steps - 1)
+            p = i / (steps - 1)
             a = a1 + (a2 - a1) * p
             x = cx + abs(radius) * math.cos(math.radians(a))
             y = cy + abs(radius) * math.sin(math.radians(a))

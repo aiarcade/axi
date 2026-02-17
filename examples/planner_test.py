@@ -18,11 +18,11 @@ def main():
     planner = Planner(
         acceleration=50, max_velocity=200, corner_factor=1)
     plan = planner.plan(points)
-    print 'var PIECES = ['
+    print('var PIECES = [')
     for b in plan.blocks:
         record = (b.p1.x, b.p1.y, b.p2.x, b.p2.y, b.a, b.t)
-        print '[%s],' % ','.join(map(str, record))
-    print '];'
+        print('[%s],' % ','.join(map(str, record)))
+    print('];')
 
 if __name__ == '__main__':
     main()

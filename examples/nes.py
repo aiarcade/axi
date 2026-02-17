@@ -1,5 +1,3 @@
-from __future__ import division, print_function
-
 import axi
 import numpy as np
 import os
@@ -73,7 +71,7 @@ def main():
     lines = data.split('\n')
     lines = [x.strip() for x in lines]
     lines = [x.strip(',') for x in lines]
-    lines = filter(None, lines)
+    lines = list(filter(None, lines))
 
     # read values and transpose
     data = [tuple(map(int, line.split(','))) for line in lines]

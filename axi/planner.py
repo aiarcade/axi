@@ -1,5 +1,3 @@
-from __future__ import division
-
 from bisect import bisect
 from collections import namedtuple
 from math import sqrt, hypot

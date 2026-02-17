@@ -112,7 +112,7 @@ def create_drawing(rule, w, h):
     rows = pad(rows)
     rows = crop(rows, w)
     # rows = pad(rows)
-    print len(rows[0]), len(rows)
+    print(len(rows[0]), len(rows))
     pairs, points = form_pairs(rows)
     counts = defaultdict(int)
     for a, b in pairs:
@@ -253,19 +253,19 @@ def multiple():
     d = vertical_stack([title, d], 0.2)
     d = d.scale_to_fit(12, 8.5)
     # d.add(multiple_label('#31'))
-    print len(d.paths)
-    print 'joining paths'
+    print(len(d.paths))
+    print('joining paths')
     d = d.join_paths(0.01)
-    print len(d.paths)
-    print 'sorting paths'
+    print(len(d.paths))
+    print('sorting paths')
     d = d.sort_paths()
-    print len(d.paths)
-    print 'joining paths'
+    print(len(d.paths))
+    print('joining paths')
     d = d.join_paths(0.01)
-    print len(d.paths)
-    print 'simplifying paths'
+    print(len(d.paths))
+    print('simplifying paths')
     d = d.simplify_paths(0.001)
-    print d.bounds
+    print(d.bounds)
     d.dump('out.axi')
     im = d.render(scale=109 * 1, line_width=0.3/25.4, show_axi_bounds=False)
     im.write_to_png('out.png')

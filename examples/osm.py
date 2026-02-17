@@ -83,7 +83,7 @@ def follow(g, step):
     return result
 
 def hatch(g, angle, step):
-    print g.area
+    print(g.area)
     x0, y0, x1, y1 = g.bounds
     d = max(x1 - x0, y1 - y0) * 2
     lines = []
@@ -188,7 +188,7 @@ def main():
         elif 'building' in g.tags:
             gs.append(g)
 
-    print 'crop'
+    print('crop')
     gs = [crop(g, w * 1.1, h * 1.1) for g in gs]
     roads = [crop(g, w * 1.1, h * 1.1) for g in roads]
 
@@ -229,7 +229,7 @@ def main():
     #     g = crop(g, w * 1.1, h * 1.1)
     #     gs.append(g)
 
-    print 'union'
+    print('union')
     roads = ops.cascaded_union(roads)
     all_roads = []
     while not roads.is_empty:
@@ -238,7 +238,7 @@ def main():
     g = geometry.collection.GeometryCollection(gs + all_roads)
     g = paths_to_shapely(shapely_to_paths(g))
 
-    print 'crop'
+    print('crop')
     g = crop(g, w, h)
 
     paths = shapely_to_paths(g)
@@ -253,7 +253,7 @@ def main():
     for m in range(1):
         paths.append(box(w - s * m, h - s * m))
 
-    print 'axi'
+    print('axi')
     d = axi.Drawing(paths)
     d = d.rotate_and_scale_to_fit(PAGE_WIDTH_IN, PAGE_HEIGHT_IN, step=90)
     d = d.sort_paths().join_paths(0.002).simplify_paths(0.002)

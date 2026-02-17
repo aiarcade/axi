@@ -14,13 +14,14 @@ setup(
         ]
     },
     license='MIT',
-    classifiers=(
+    python_requires='>=3',
+    classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: Implementation :: CPython',
-    ),
+    ],
 )

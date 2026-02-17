@@ -1,9 +1,7 @@
-from __future__ import division, print_function
-
 import time
 
 from math import modf
-from serial import Serial
+from serial import Serial, SerialException
 from serial.tools.list_ports import comports
 
 from .paths import path_length
@@ -64,7 +62,7 @@ class Device(object):
         port = find_port()
         if port is None:
             raise Exception('cannot find axidraw device')
-        self.serial = Serial(port, timeout=1)
+        self.serial = Serial(port, timeout=5)
         self.configure()
 
     def configure(self):
@@ -98,8 +96,15 @@ class Device(object):
 
     def command(self, *args):
         line = ','.join(map(str, args))
-        self.serial.write((line + '\r').encode('utf-8'))
-        return self.readline()
+        for attempt in range(3):
+            try:
+                self.serial.write((line + '\r').encode('utf-8'))
+                return self.readline()
+            except (SerialException, OSError):
+                if attempt < 2:
+                    time.sleep(0.5)
+                    continue
+                raise
 
     # higher level functions
     def move(self, dx, dy):
@@ -202,10 +207,10 @@ class Device(object):
         delta = abs(self.pen_up_position - self.pen_down_position)
         duration = int(1000 * delta / self.pen_up_speed)
         delay = max(0, duration + self.pen_up_delay)
-        return self.command('SP', 1, delay)
+        return self.command('SP', 0, delay)
 
     def pen_down(self):
         delta = abs(self.pen_up_position - self.pen_down_position)
         duration = int(1000 * delta / self.pen_down_speed)
         delay = max(0, duration + self.pen_down_delay)
-        return self.command('SP', 0, delay)
+        return self.command('SP', 1, delay)

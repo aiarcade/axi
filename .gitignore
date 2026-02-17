@@ -2,3 +2,8 @@
 *.egg-info
 *.pyc
 
+/venv
+/build
+/dist
+__pycache__/
+*.png

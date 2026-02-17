@@ -4,8 +4,8 @@ import time
 def pretty_time(seconds):
     seconds = int(round(seconds))
     s = seconds % 60
-    m = (seconds / 60) % 60
-    h = (seconds / 3600)
+    m = (seconds // 60) % 60
+    h = (seconds // 3600)
     return '%d:%02d:%02d' % (h, m, s)
 
 class Bar(object):
@@ -20,7 +20,10 @@ class Bar(object):
 
     @property
     def percent_complete(self):
-        return 100.0 * (self.value - self.min_value) / (self.max_value - self.min_value)
+        denom = self.max_value - self.min_value
+        if denom == 0:
+            return 100.0
+        return 100.0 * (self.value - self.min_value) / denom
 
     @property
     def elapsed_time(self):

@@ -1,5 +1,3 @@
-from __future__ import division
-
 from itertools import groupby
 from PIL import Image
 
@@ -98,7 +96,7 @@ def main():
     im = im.convert('L')
     im = crop(im)
     # im.save('crop.png')
-    print im.size
+    print(im.size)
     w, h = im.size
     data = np.asarray(im)
     data = data / np.amax(data)
@@ -109,13 +107,13 @@ def main():
         y1 = y0 + lines_per_row
         d = data[y0:y1]
         for q in range(0, 101, 25):
-            print j, q
+            print(j, q)
             values = np.percentile(d, q, axis=0) * 1.2
             path = enumerate(values)
             for path in remove_flats(path):
                 x = np.array([p[0] for p in path]) * WIDTH / w
                 y = (j - np.array([p[1] for p in path])) * HEIGHT / ROWS
-                path = zip(x, y)
+                path = list(zip(x, y))
                 path = axi.simplify_paths([path], 0.005)[0]
                 paths.append(path)
         lat = LAT1 + (LAT2 - LAT1) * j / (ROWS)
@@ -124,15 +122,15 @@ def main():
         x = (lng - LNG1) / (LNG2 - LNG1) * WIDTH
         paths.extend(lng_label('%g' % abs(lng), x))
     d = axi.Drawing(paths)
-    print len(d.paths)
-    print 'joining paths'
+    print(len(d.paths))
+    print('joining paths')
     d = d.join_paths(0.01)
-    print len(d.paths)
-    print 'sorting paths'
+    print(len(d.paths))
+    print('sorting paths')
     d = d.sort_paths()
-    print 'joining paths'
+    print('joining paths')
     d = d.join_paths(0.01)
-    print len(d.paths)
+    print(len(d.paths))
 
     d = vertical_stack([title(), d], 0.25)
 

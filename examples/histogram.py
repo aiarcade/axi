@@ -1,5 +1,3 @@
-from __future__ import division
-
 import axi
 
 def main():
@@ -40,7 +38,7 @@ def main():
     d = d.rotate(180)
     d = d.rotate_and_scale_to_fit(8.5, 8.5, step=90)
     d = d.move(12, 8.5 / 2, 1, 0.5)
-    print d.bounds
+    print(d.bounds)
 
     d = d.sort_paths()
     d = d.join_paths(0.01)

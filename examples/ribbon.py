@@ -34,7 +34,7 @@ def grid_drawings(ds, columns, spacing=0):
     w = max(d.width for d in ds) + spacing
     h = max(d.height for d in ds) + spacing
     for i, d in enumerate(ds):
-        r = i / columns
+        r = i // columns
         c = i % columns
         x = c * w + (w - d.width) / 2
         y = r * h + (h - d.height) / 2
@@ -88,27 +88,27 @@ def main():
         # 'ribbon/amyloid-beta/1iyt.txt',
     ]
     angles = [90, 90, 75, 60]
-    print 'loading paths'
+    print('loading paths')
     ds = []
     for filename, angle in zip(filenames, angles):
         ds.append(axi.Drawing(axi.load_paths(filename)).scale(1, -1))
     # d = grid_drawings(ds, 2, 1)
     d = ds[0]
-    print len(d.paths)
-    print 'joining paths'
+    print(len(d.paths))
+    print('joining paths')
     d = d.join_paths(0.01)
-    print len(d.paths)
-    print 'transforming paths'
+    print(len(d.paths))
+    print('transforming paths')
     # d = d.scale(1, -1)
     d = d.rotate(180)
     d = d.rotate_and_scale_to_fit(8.5, 12 - text.height)
     # d = d.origin()
-    print 'sorting paths'
+    print('sorting paths')
     d = d.sort_paths()
-    print 'joining paths'
+    print('joining paths')
     d = d.join_paths(0.01)
-    print len(d.paths)
-    print 'simplifying paths'
+    print(len(d.paths))
+    print('simplifying paths')
     d = d.simplify_paths(0.001)
 
     # add title and label and fit to page
@@ -120,11 +120,11 @@ def main():
     # d.add(title())
     d.add(label())
 
-    print 'rendering paths'
+    print('rendering paths')
     d.render(line_width=0.25/25.4).write_to_png('out.png')
     # axi.draw(d)
 
-    print d.bounds
+    print(d.bounds)
 
     d.dump('out.axi')
     d.dump_svg('out.svg')

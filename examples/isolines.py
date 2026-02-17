@@ -3,17 +3,17 @@ import sys
 
 def prepare():
     d = axi.Drawing.load(sys.argv[1])
-    print len(d.paths)
-    print 'transforming'
+    print(len(d.paths))
+    print('transforming')
     d = d.rotate_and_scale_to_fit(12, 8.5)
-    print 'sorting'
+    print('sorting')
     d = d.sort_paths()
-    print 'joining'
+    print('joining')
     d = d.join_paths(0.01)
-    print len(d.paths)
-    print 'simplifying'
+    print(len(d.paths))
+    print('simplifying')
     d = d.simplify_paths(0.005)
-    print 'rendering'
+    print('rendering')
     im = d.render(
         scale=109 * 1, line_width=0.3/25.4,
         show_axi_bounds=False, use_axi_bounds=False)

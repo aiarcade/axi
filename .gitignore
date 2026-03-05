@@ -7,3 +7,9 @@
 /dist
 __pycache__/
 *.png
+calibration.json
+debug_*.png
+calibration_frame.png
+marker_*.png
+calibration_markers.png
+.env

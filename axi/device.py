@@ -13,8 +13,10 @@ TIMESLICE_MS = 10
 MICROSTEPPING_MODE = 1
 STEP_DIVIDER = 2 ** (MICROSTEPPING_MODE - 1)
 
-STEPS_PER_INCH = 2032 / STEP_DIVIDER
-STEPS_PER_MM = 80 / STEP_DIVIDER
+STEPS_PER_INCH = 2065 / STEP_DIVIDER
+STEPS_PER_INCH_X = 2464 / STEP_DIVIDER
+STEPS_PER_INCH_Y = 2700 / STEP_DIVIDER
+STEPS_PER_MM = 81.3 / STEP_DIVIDER
 
 PEN_UP_POSITION = 60
 PEN_UP_SPEED = 150
@@ -29,7 +31,7 @@ MAX_VELOCITY = 4
 CORNER_FACTOR = 0.001
 
 JOG_ACCELERATION = 16
-JOG_MAX_VELOCITY = 8
+JOG_MAX_VELOCITY = 4
 
 VID_PID = '04D8:FD92'
 
@@ -42,6 +44,8 @@ def find_port():
 class Device(object):
     def __init__(self, **kwargs):
         self.steps_per_unit = STEPS_PER_INCH
+        self.steps_per_unit_x = STEPS_PER_INCH_X
+        self.steps_per_unit_y = STEPS_PER_INCH_Y
         self.pen_up_position = PEN_UP_POSITION
         self.pen_up_speed = PEN_UP_SPEED
         self.pen_up_delay = PEN_UP_DELAY
@@ -59,11 +63,24 @@ class Device(object):
 
         self.error = (0, 0) # accumulated step error
 
-        port = find_port()
-        if port is None:
+        self.port = find_port()
+        if self.port is None:
             raise Exception('cannot find axidraw device')
-        self.serial = Serial(port, timeout=5)
+        self.serial = Serial(self.port, timeout=5)
         self.configure()
+
+    def reconnect(self):
+        """Reconnect to the serial port after a connection drop."""
+        try:
+            self.serial.close()
+        except Exception:
+            pass
+        time.sleep(1)
+        self.port = find_port()
+        if self.port is None:
+            raise Exception('cannot find axidraw device after reconnect')
+        self.serial = Serial(self.port, timeout=5)
+        time.sleep(0.5)
 
     def configure(self):
         servo_min = 7500
@@ -103,6 +120,10 @@ class Device(object):
             except (SerialException, OSError):
                 if attempt < 2:
                     time.sleep(0.5)
+                    try:
+                        self.reconnect()
+                    except Exception:
+                        pass
                     continue
                 raise
 
@@ -138,13 +159,24 @@ class Device(object):
 
     def read_position(self):
         response = self.command('QS')
-        self.readline()
-        a, b = map(int, response.split(','))
-        a /= self.steps_per_unit
-        b /= self.steps_per_unit
-        y = (a - b) / 2
-        x = y + b
-        return x, y
+        # EBB may return position on first or second line
+        for _ in range(3):
+            if ',' in response:
+                parts = response.split(',')
+                try:
+                    a, b = int(parts[0]), int(parts[1])
+                    # drain any remaining data
+                    try:
+                        self.readline()
+                    except Exception:
+                        pass
+                    x = a / self.steps_per_unit_x
+                    y = b / self.steps_per_unit_y
+                    return x, y
+                except (ValueError, IndexError):
+                    pass
+            response = self.readline()
+        raise ValueError('Could not parse QS response')
 
     def stepper_move(self, duration, a, b):
         return self.command('XM', duration, a, b)
@@ -162,8 +194,8 @@ class Device(object):
             i2 = plan.instant(t + step_s)
             d = i2.p.sub(i1.p)
             ex, ey = self.error
-            ex, sx = modf(d.x * self.steps_per_unit + ex)
-            ey, sy = modf(d.y * self.steps_per_unit + ey)
+            ex, sx = modf(d.x * self.steps_per_unit_x + ex)
+            ey, sy = modf(d.y * self.steps_per_unit_y + ey)
             self.error = ex, ey
             self.stepper_move(step_ms, int(sx), int(sy))
             t += step_s

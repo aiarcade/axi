@@ -34,10 +34,9 @@ def load_page_size():
 def draw_boundary(page_w, page_h, grid_spacing=0):
     """Draw the page boundary and optional grid on the plotter.
 
-    Uses direct Device.run_path() calls with explicit wait() between
-    every operation — the same reliable pattern as draw_circles_direct.py.
-    No run_drawing() — that method lacks proper synchronisation between
-    paths and causes accumulated position drift.
+    Uses axi.Drawing + Device.run_drawing() — the same approach
+    that sample_test.py uses successfully.
+    Draws boundary and center cross as a single Drawing to avoid accumulated error.
     """
     print()
     print('  *** IMPORTANT: Pen must be at HOME position (bottom-right corner) ***')
@@ -45,57 +44,63 @@ def draw_boundary(page_w, page_h, grid_spacing=0):
     print()
     input('  Press Enter when the pen is at home (bottom-right)...')
 
-    cx, cy = page_w / 2, page_h / 2
-    cross_size = 0.3
+    cx, cy = int(page_w / 2), int(page_h / 2)
+    cross_size = 1
 
+    # Build boundary rectangle only as a Drawing
+    paths = [
+        [(0, 0), (5,0),(5,2)]
+    ]
+
+    drawing = axi.Drawing(paths)
     print(f'Drawing boundary: {page_w}" x {page_h}"')
-    print(f'  Center mark target: ({cx:.2f}", {cy:.2f}")')
+    print(f'  Center mark at ({cx:.2f}", {cy:.2f}")')
 
     d = axi.Device()
     d.enable_motors()
     d.zero_position()
     time.sleep(0.3)
-
-    # ── Boundary rectangle ──
-    # The pen is already at (0,0), which is the first vertex.
-    boundary = [(0, 0), (page_w, 0), (page_w, page_h), (0, page_h), (0, 0)]
-    pos = (0.0, 0.0)
-
-    print('  Drawing boundary rectangle...')
-    # No jog needed — pen is already at the start of the boundary
-    d.pen_down()
-    time.sleep(0.1)
-    d.run_path(boundary)
-    d.wait()
+    #d.run_drawing(drawing)
+    #d.wait()
+    #print('  Boundary done.')
     d.pen_up()
-    time.sleep(0.1)
-    pos = boundary[-1]  # (0, 0)
-    print('  Boundary done.')
-
-    # ── Center cross ──
-    print(f'  Drawing center mark at ({cx:.2f}", {cy:.2f}")')
-
-    # Horizontal line
-    d.run_path([pos, (cx - cross_size, cy)], jog=True)
+    d.run_path([(0,0),(page_w,page_h)], jog=True)
     d.wait()
     d.pen_down()
-    time.sleep(0.1)
-    d.run_path([(cx - cross_size, cy), (cx + cross_size, cy)])
-    d.wait()
-    d.pen_up()
-    time.sleep(0.1)
-    pos = (cx + cross_size, cy)
+    # d.run_path([(cx,cy-cross_size),(cx,cy+cross_size)])
+    # d.wait()
+    # d.pen_up()
+    d.disable_motors()
 
-    # Vertical line
-    d.run_path([pos, (cx, cy - cross_size)], jog=True)
-    d.wait()
-    d.pen_down()
-    time.sleep(0.1)
-    d.run_path([(cx, cy - cross_size), (cx, cy + cross_size)])
-    d.wait()
-    d.pen_up()
-    time.sleep(0.1)
-    pos = (cx, cy + cross_size)
+   
+    # center_mark_vdraw= axi.Drawing([[ (0,0), (cx,cy-cross_size), (cx,cy+cross_size)]])
+    # center_mark_hdraw= axi.Drawing([[ (cx,cy+cross_size),(cx-cross_size,cy), (cx+cross_size,cy)]])
+    # d = axi.Device()
+    # d.enable_motors()
+    # d.zero_position()
+    # time.sleep(0.3)
+    # d.run_drawing(center_mark_vdraw)
+    # d.wait()
+    # d.disable_motors()
+
+    # d = axi.Device()
+    # d.enable_motors()
+    # d.zero_position()
+    # time.sleep(0.3)
+    # d.run_drawing(center_mark_hdraw)
+    # d.wait()
+    # d.disable_motors()
+
+    # print('  Center mark done.')
+
+    # ── Center cross (drawn separately with explicit waits) ──
+    # Reset position tracking so the cross isn't affected by
+    # any accumulated step error from the boundary rectangle.
+    d.zero_position()
+    d.error = (0, 0)
+    time.sleep(0.2)
+
+    
 
     print('  Center mark done.')
 
@@ -105,7 +110,7 @@ def draw_boundary(page_w, page_h, grid_spacing=0):
         # Horizontal lines
         y = grid_spacing
         while y < page_h:
-            d.run_path([pos, (0, y)], jog=True)
+            d.run_path([cur_pos, (0, y)], jog=True)
             d.wait()
             d.pen_down()
             time.sleep(0.1)
@@ -113,12 +118,12 @@ def draw_boundary(page_w, page_h, grid_spacing=0):
             d.wait()
             d.pen_up()
             time.sleep(0.1)
-            pos = (page_w, y)
+            cur_pos = (page_w, y)
             y += grid_spacing
         # Vertical lines
         x = grid_spacing
         while x < page_w:
-            d.run_path([pos, (x, 0)], jog=True)
+            d.run_path([cur_pos, (x, 0)], jog=True)
             d.wait()
             d.pen_down()
             time.sleep(0.1)
@@ -126,13 +131,13 @@ def draw_boundary(page_w, page_h, grid_spacing=0):
             d.wait()
             d.pen_up()
             time.sleep(0.1)
-            pos = (x, page_h)
+            cur_pos = (x, page_h)
             x += grid_spacing
         print('  Grid done.')
 
     # Return home
-    d.run_path([pos, (0, 0)], jog=True)
-    d.wait()
+    d.zero_position()
+    d.error = (0, 0)
     d.disable_motors()
     print('Complete.')
 

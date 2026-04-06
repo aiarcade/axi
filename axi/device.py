@@ -13,9 +13,9 @@ TIMESLICE_MS = 10
 MICROSTEPPING_MODE = 1
 STEP_DIVIDER = 2 ** (MICROSTEPPING_MODE - 1)
 
-STEPS_PER_INCH = 2065 / STEP_DIVIDER
-STEPS_PER_INCH_X = 2464 / STEP_DIVIDER
-STEPS_PER_INCH_Y = 2700 / STEP_DIVIDER
+STEPS_PER_INCH = 2029 / STEP_DIVIDER
+STEPS_PER_INCH_X = 2029 / STEP_DIVIDER
+STEPS_PER_INCH_Y = 2029 / STEP_DIVIDER
 STEPS_PER_MM = 81.3 / STEP_DIVIDER
 
 PEN_UP_POSITION = 60
@@ -217,10 +217,12 @@ class Device(object):
         bar = Bar(drawing.length, enabled=progress)
         for path in drawing.paths:
             jog = [position, path[0]]
+            print("init",position, path[0])
             self.run_path(jog, jog=True)
             bar.increment(path_length(jog))
             self.pen_down()
             self.run_path(path)
+            print("runpath", path)
             self.pen_up()
             position = path[-1]
             bar.increment(path_length(path))
